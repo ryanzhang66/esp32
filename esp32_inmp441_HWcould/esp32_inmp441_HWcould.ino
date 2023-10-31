@@ -34,6 +34,7 @@ int i;
  
 // 定义缓冲区长度
 #define bufferLen 64
+#define SAMPLE_RATE 20000 //设置音频缓冲区大小
 int16_t sBuffer[bufferLen];
  
 /*******************************************************/
@@ -82,7 +83,7 @@ void MQTT_Init()
  * 返回值：无
  * 命名说明：Capacity：容量
  */
-void TASK_Capacity_Report(int buf[100])
+void TASK_Capacity_Report(int buf[SAMPLE_RATE])
 {
  int a[10]={1,2,3,4,5,6,7,8,9,0};
 //以下部分代码调用了ArduinoJson库将属性上报消息打包为JSON格式
@@ -127,8 +128,8 @@ void i2s_install() {
   //设置I2S处理器配置
   const i2s_config_t i2s_config = {
     .mode = i2s_mode_t(I2S_MODE_MASTER | I2S_MODE_RX),
-    .sample_rate = 44100,
-    .bits_per_sample = i2s_bits_per_sample_t(16),
+    .sample_rate = 44100,                                         //设置音频采样率为 44100Hz，采样点是44100个
+    .bits_per_sample = i2s_bits_per_sample_t(16),                 //设置音频采样深度为 16bit
     .channel_format = I2S_CHANNEL_FMT_ONLY_LEFT,
     .communication_format = i2s_comm_format_t(I2S_COMM_FORMAT_STAND_I2S),
     .intr_alloc_flags = 0,
@@ -193,14 +194,17 @@ void setup()
   inmp441_init();
 }
 
-int inmp441_buf[100];
+int inmp441_buf[SAMPLE_RATE];
 
 void loop()
 {
-  for (int i=0; i<100; i++)
+  for (int i=0; i<SAMPLE_RATE; i++)
   {
     inmp441_buf[i] = inmp441_get();
+    Serial.print(inmp441_buf[i]);
+    //Serial.println();
   }
+  
   TASK_Capacity_Report(inmp441_buf);
   delay(50U);
 }
